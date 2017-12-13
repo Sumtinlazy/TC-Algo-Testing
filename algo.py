@@ -1,10 +1,28 @@
+from urllib2 import Request, urlopen
 import requests
 from time import time
+import base64
+import json
 
-r = requests.get('https://api.kucoin.com/', {
-    'KC-API-KEY': '5a300ab009e5a11c90c5a220',
-    'KC-API-NONCE': time(),
-    'KC-API-SIGNATURE': 'fd83147802c361575bbe72fef32ba90dcb364d388d05cb909c1a6e832f6ca3ac'
-})
 
-print(r.status_code)
+def signature(): #dc955e1e-12a6-4396-9c1e-bebb21c23b1a is secret
+    host = 'https://api.kucoin.com'
+    endpoint = '/v1/KCS-BTC/order'
+    secret = 'dc955e1e-12a6-4396-9c1e-bebb21c23b1a'
+    string = endpoint+'/'+secret
+    string = base64.b64encode(string)
+    return string
+
+
+Authorize = {
+    "KC-API-KEY": "59c5ecfe18497f5394ded813",
+    "KC-API-NONCE": time(),
+    "KC-API-SIGNATURE": signature()
+}
+KEY = requests.get('https://api.kucoin.com/v1/api/list',params=Authorize)
+
+
+request = Request('https://api.kucoin.com/v1/open/currencies')
+
+response_body = urlopen(request).read()
+print response_body
