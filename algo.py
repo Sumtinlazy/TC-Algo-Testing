@@ -5,14 +5,44 @@ import base64
 import json
 import ccxt
 from time import sleep
+import numpy as np
+'dc955e1e-12a6-4396-9c1e-bebb21c23b1a is secret'
 
-#dc955e1e-12a6-4396-9c1e-bebb21c23b1a is secret
 
+# returns the current price of RPX
+def priceRPX():
+    request = Request('https://api.kucoin.com/v1/open/tick?symbol=RPX-ETH')
+    data = urlopen(request).read()
+    data = json.loads(data)
+    data = data['data']['lastDealPrice']
+    return data
+
+
+def movingaverage(values, window):
+    weights = np.repeat(1.0, window) / window
+    sma = np.convolve(values, weights, 'valid')
+    return sma
+
+
+dataRPX = list()
+trend = 0
+# this is the main loop
+while True:
+    # add latest price to price list
+    dataRPX.append(priceRPX())
+    print('current price:',priceRPX())
+    if len(dataRPX) >= 60:
+        # find average price from last minute
+        trend = movingaverage(dataRPX, 60)
+        print('trend:',trend[len(trend)-1])
+    sleep(1)
+
+# noinspection PyUnreachableCode
 '''
 average = []
 trend = []
 coins = 'ETH'
-price = requests.get('https://api.kucoin.com/v1/open/currencies', params = coins)
+price = requests.get('https://api.kucoin.com/v1/open/currencies')
 data = urlopen(price).read()
 data = json.loads(data)
 USD = data['data']['rates']['BTC']['USD']
@@ -22,12 +52,12 @@ parameters = {
     amount: 10,
     price: 1.1
 }
-'''
+
 
 
 def signature(order, amount, price):
     type = order
-    
+
 
     r = Request('https://api.kucoin.com/')
     r.headers = {
@@ -37,7 +67,6 @@ def signature(order, amount, price):
 }
 
 
-'''
 while True:
     if len(average) < 10 :
         average.append(USD)
