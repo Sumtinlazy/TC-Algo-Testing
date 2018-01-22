@@ -6,9 +6,18 @@ import json
 import ccxt
 from time import sleep
 import numpy as np
-'dc955e1e-12a6-4396-9c1e-bebb21c23b1a is secret'
+import plotly.plotly as py
+from datetime import datetime
+from plotly.tools import FigureFactory as FF
+from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
+import plotly.offline as offline
+import plotly.graph_objs as go
+'''
+request = Request('https://api.kucoin.com/v1/user/info ')
+secret = 'dc955e1e-12a6-4396-9c1e-bebb21c23b1a'
+key = '5a30780191ed297ad231d9f8'
 
-
+print int(time()*1000)
 # returns the current price of RPX
 def priceRPX():
     request = Request('https://api.kucoin.com/v1/open/tick?symbol=RPX-ETH')
@@ -23,8 +32,6 @@ def movingaverage(values, window):
     sma = np.convolve(values, weights, 'valid')
     return sma
 
-def authenticate(type, amount, price):
-
 
 dataRPX = list()
 maverage = list()
@@ -34,24 +41,20 @@ changeRPX = list()
 while True:
     # add latest price to price list
     dataRPX.append(priceRPX())
-    print('current price:',priceRPX()),len(dataRPX)
-
-    if len(dataRPX) > 60:
-        # find average price from last minute
-        trend = movingaverage(dataRPX, 60)
-        print('trend last minute:',(dataRPX[len(dataRPX)]-dataRPX[len(dataRPX)-60])/dataRPX[len(dataRPX)-60]*100) + '%'
-
+    print('current price:',priceRPX(),'index:', len(dataRPX), 'change:',  round(100*(dataRPX[len(dataRPX)-1]/dataRPX[len(dataRPX)-2]), 2))
 
 
     sleep(1)
 
 # noinspection PyUnreachableCode
 
+
 class Client():
     BASE_URL = 'api.kucoin.com'
-    def __init__(self, key = None, secret = None):
+
+    def __init__(self, key, secret):
         if key is None:
-            key = DEFAULT_KEY
+            key = key
         #also for secret
         self.key = key
 
@@ -59,44 +62,72 @@ class Client():
 def params_to_str():
     pass
 
+
 def _get(endpoint, **parmas):
     prams_str = ''
     url = BASE_URL + '?' + params_str
-    #send GET request to that url
+    # send GET request to that url
     date = parse('')
     pass
 
+
 def parse(data):
+    return ''
     pass
 
-def _sign(endpoint, nonce, str_params_for_sign):
-    #use SHA_256 to encrypto
-    str_to_sign = endpoint + '/' + nonce + '/' + str_params_for_sign
+
+
+
+def _sign(endpoint, str_params_for_sign):
+    # use SHA_256 to encrypto
+    str_to_sign = endpoint + '/' + i    nt(time()*1000) + '/' + str_params_for_sign
     str_to_sign = base64.b64encode(str_to_sign.encode('utf-8'))
     signed_str = hmac.new(secret.encode(), str_to_sign, hashlib.sha256).hexdigest()
     return signed_str
 
+
 def _nonce():
     return
 
+
 def _post(endpoint, payload):
-    #organize header
+    # organize header
     header = {}
-    payload = {}
+    payload = {
+
+    }
     url = BASE_URL + '/' + endpoint
-    signed_str = _sign(endpoint, nonce, str_params_for_sign)
-    #post your request to url
+    signed_str = _sign(endpoint, str_params_for_sign)
+    # post your request to url
     header['KC-API-SIGNATURE'] = signed_str
-    #add key and nonce
+    header['KC-API-NONCE'] = time()
+    # add key and nonce
 
     data = ''
-    #parse
+    # parse
     return
 
 
 def create_limit_order(symbol, side, price, amount):
     pass
 
+'''
+
+
+# historic data
+def historic(symbol,first, last):
+    request = Request('https://api.kucoin.com/v1/open/chart/history?symbol='+symbol+'&from='+first+'&to='+last)
+    response_body = urlopen(request).read()
+    response_body = json.loads(response_body)
+    return response_body
+
+
+# graphing
+offline.init_notebook_mode()
+plotdata = historic('RPX-ETH', '1006609507', '1516033560')
+plotx = []
+plotx = range(0,len(plotdata))
+offline.iplot({'data': [{'y': plotdata}], 'layout': {'title': 'Test Plot', 'font': dict(size=16)}}, image='png')
 '''
 average = []
 trend = []
