@@ -12,6 +12,7 @@ from plotly.tools import FigureFactory as FF
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
 import plotly.offline as offline
 import plotly.graph_objs as go
+import json
 '''
 request = Request('https://api.kucoin.com/v1/user/info ')
 secret = 'dc955e1e-12a6-4396-9c1e-bebb21c23b1a'
@@ -116,11 +117,17 @@ def create_limit_order(symbol, side, price, amount):
 
 # historic data
 def historic(symbol,first, last):
-    request = Request('https://api.kucoin.com/v1/open/chart/history?symbol='+symbol+'&from='+first+'&to='+last)
-    response_body = urlopen(request).read()
-    response_body = json.loads(response_body)
-    return response_body
+    payload = {
+        'symbol':symbol,
+        'from':first,
+        'to':last
+    }
+    request = requests.get('https://api.kucoin.com/v1/open/chart/history', params=payload)
+    jdata = request.json()
+    return jdata['c']
 
+
+print historic('RPX-ETH', '1006609507', '1516033560')
 
 # graphing
 offline.init_notebook_mode()
