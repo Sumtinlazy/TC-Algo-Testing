@@ -1,3 +1,5 @@
+from matplotlib import pyplot
+import numpy
 from urllib2 import Request, urlopen
 import requests
 from time import time
@@ -6,13 +8,6 @@ import json
 import ccxt
 from time import sleep
 import numpy as np
-import plotly.plotly as py
-from datetime import datetime
-from plotly.tools import FigureFactory as FF
-from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
-import plotly.offline as offline
-import plotly.graph_objs as go
-import json
 '''
 request = Request('https://api.kucoin.com/v1/user/info ')
 secret = 'dc955e1e-12a6-4396-9c1e-bebb21c23b1a'
@@ -127,14 +122,18 @@ def historic(symbol,first, last):
     return jdata['c']
 
 
-print historic('RPX-ETH', '1006609507', '1516033560')
+print(historic('RPX-ETH', '1006609507', '1516033560'))
 
 # graphing
-offline.init_notebook_mode()
-plotdata = historic('RPX-ETH', '1006609507', '1516033560')
-plotx = []
-plotx = range(0,len(plotdata))
-offline.iplot({'data': [{'y': plotdata}], 'layout': {'title': 'Test Plot', 'font': dict(size=16)}}, image='png')
+x = [5,2,7]
+y = [1,2,3]
+pyplot.plot(x,y)
+pyplot.title('test')
+pyplot.ylabel('y')
+pyplot.xlabel('x')
+pyplot.show()
+
+
 '''
 average = []
 trend = []
@@ -143,7 +142,7 @@ price = requests.get('https://api.kucoin.com/v1/open/currencies')
 data = urlopen(price).read()
 data = json.loads(data)
 USD = data['data']['rates']['BTC']['USD']
-print data
+print(data)
 parameters = {
     type: BUY,
     amount: 10,
@@ -173,9 +172,9 @@ while True:
     print(average)
     if len(average) == 10:
         maverage = (float(average[0]))/int(average[9])-1
-        print maverage, "% <-- growth in last 10 ticks"
+        print(maverage, "% <-- growth in last 10 ticks")
         trend.append(maverage)
-        print average[0] - average[9]
+        print(average[0] - average[9])
     price = Request('https://api.kucoin.com/v1/open/currencies')
     sleep(10)
 '''
