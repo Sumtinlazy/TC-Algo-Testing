@@ -1,0 +1,74 @@
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib import pyplot
+import numpy
+import requests
+import pandas as pd
+
+
+'''
+def historic(symbol,first, last):
+    payload = {
+        'symbol':symbol,
+        'from':first,
+        'to':last
+    }
+    request = requests.get('https://api.kucoin.com/v1/open/chart/history', params=payload)
+    jdata = request.json()
+    return jdata
+
+
+print(historic('RPX-ETH', '1006609507', '1516033560'))
+y = historic('RPX-ETH', '1006609507', '1516033560')
+x = range(len(y))
+pyplot.plot(x,y)
+pyplot.title('test')
+pyplot.ylabel('y')
+pyplot.xlabel('x')
+pyplot.show()
+
+
+payload = {
+    'symbol':'RPX-ETH',
+    'from':'100603756',
+    'to':'9516619507'
+}
+request = requests.get('https://api.kucoin.com/v1/open/chart/history', params=payload)
+print(request.url)
+jdata = request.json()
+print(jdata['c'])
+'''
+
+
+# Alphabetizes dictionary and converts to string
+dictionary = {
+    'price': '.00023',
+    'amount': '10',
+    'type': 'BUY'
+}
+
+
+def params_to_str(params):
+    sign = ''
+    keys = list()
+    for i in range(0, len(dictionary)):
+        keys.append(list(params.keys())[i])
+        keys = sorted(keys)
+    for i in range(0,len(dictionary)):
+        sign = sign + keys[i] + '=' + params[list(params.keys())[i]] + '&'
+    sign = sign[:-1]
+    return sign
+
+
+print(params_to_str(dictionary))
+
+
+
+
+
+
+
+
+
+
+

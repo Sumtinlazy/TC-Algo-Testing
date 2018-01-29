@@ -1,19 +1,22 @@
+import matplotlib
+matplotlib.use('TkAgg')
 from matplotlib import pyplot
 import numpy
-from urllib2 import Request, urlopen
 import requests
 from time import time
 import base64
 import json
-import ccxt
 from time import sleep
 import numpy as np
-'''
-request = Request('https://api.kucoin.com/v1/user/info ')
+import hmac
+import hashlib
+
+
+request = requests.get('https://api.kucoin.com/v1/user/info ')
 secret = 'dc955e1e-12a6-4396-9c1e-bebb21c23b1a'
 key = '5a30780191ed297ad231d9f8'
 
-print int(time()*1000)
+'''
 # returns the current price of RPX
 def priceRPX():
     request = Request('https://api.kucoin.com/v1/open/tick?symbol=RPX-ETH')
@@ -41,7 +44,7 @@ while True:
 
 
     sleep(1)
-
+'''
 # noinspection PyUnreachableCode
 
 
@@ -55,8 +58,18 @@ class Client():
         self.key = key
 
 
-def params_to_str():
-    pass
+# Alphabetizes dictionary and converts to string
+def params_to_str(params):
+    # Convert parameters to parseable string
+    sign = ''
+    keys = list()
+    for i in range(0, len(params)):
+        keys.append(list(params.keys())[i])
+        keys = sorted(keys)
+    for i in range(0, len(params)):
+        sign = sign + keys[i] + '=' + params[list(params.keys())[i]] + '&'
+    sign = sign[:-1]
+    return sign
 
 
 def _get(endpoint, **parmas):
@@ -72,18 +85,12 @@ def parse(data):
     pass
 
 
-
-
 def _sign(endpoint, str_params_for_sign):
     # use SHA_256 to encrypto
-    str_to_sign = endpoint + '/' + i    nt(time()*1000) + '/' + str_params_for_sign
+    str_to_sign = endpoint + '/' + str((time()*1000)) + '/' + str_params_for_sign
     str_to_sign = base64.b64encode(str_to_sign.encode('utf-8'))
     signed_str = hmac.new(secret.encode(), str_to_sign, hashlib.sha256).hexdigest()
     return signed_str
-
-
-def _nonce():
-    return
 
 
 def _post(endpoint, payload):
@@ -107,31 +114,30 @@ def _post(endpoint, payload):
 def create_limit_order(symbol, side, price, amount):
     pass
 
-'''
+
+print(_sign('/v1/RPX-ETH/order', params_to_str({
+    'amount': '10',
+    'price': '.00023',
+    'type': 'BUY'
+})))
+
+print(params_to_str({
+    'price': '.00023',
+    'type': 'BUY',
+    'amount': '10'
+}))
 
 
 # historic data
 def historic(symbol,first, last):
     payload = {
-        'symbol':symbol,
-        'from':first,
-        'to':last
+        'symbol': symbol,
+        'from': first,
+        'to': last
     }
     request = requests.get('https://api.kucoin.com/v1/open/chart/history', params=payload)
     jdata = request.json()
     return jdata['c']
-
-
-print(historic('RPX-ETH', '1006609507', '1516033560'))
-
-# graphing
-x = [5,2,7]
-y = [1,2,3]
-pyplot.plot(x,y)
-pyplot.title('test')
-pyplot.ylabel('y')
-pyplot.xlabel('x')
-pyplot.show()
 
 
 '''
