@@ -4,7 +4,17 @@ from matplotlib import pyplot
 import numpy
 import requests
 import pandas as pd
+import numpy
+from time import time
+import base64
+import json
+from time import sleep
+import numpy as np
+import hashlib
+import hmac
 
+secret = 'dc955e1e-12a6-4396-9c1e-bebb21c23b1a'
+key = '5a30780191ed297ad231d9f8'
 
 '''
 def historic(symbol,first, last):
@@ -37,37 +47,68 @@ request = requests.get('https://api.kucoin.com/v1/open/chart/history', params=pa
 print(request.url)
 jdata = request.json()
 print(jdata['c'])
-'''
 
 
 # Alphabetizes dictionary and converts to string
+'''
 dictionary = {
     'price': '.00023',
     'amount': '10',
     'type': 'BUY'
 }
 
-
 def params_to_str(params):
     sign = ''
     keys = list()
-    for i in range(0, len(dictionary)):
+    for i in range(0, len(params)):
         keys.append(list(params.keys())[i])
         keys = sorted(keys)
-    for i in range(0,len(dictionary)):
-        sign = sign + keys[i] + '=' + params[list(params.keys())[i]] + '&'
+    for i in range(0,len(params)):
+        sign = sign+keys[i]+'='+params[keys[i]]+'&'
     sign = sign[:-1]
     return sign
 
 
-print(params_to_str(dictionary))
+def _sign(endpoint, str_params_for_sign,nonce):
+    # use SHA_256 to encrypto
+    str_to_sign = endpoint + '/' + nonce + '/' + str_params_for_sign
+    str_to_sign = base64.b64encode(str_to_sign.encode('utf-8'))
+    signed_str = hmac.new(secret.encode(), str_to_sign, hashlib.sha256).hexdigest()
+    return signed_str
+
+
+def _post(endpoint, payload):
+    # organize header
+    header = {
+        'Accept-Language':'en_US',
+        'Content-type':'application/json'
+    }
+    url = 'https://api.kucoin.com' + endpoint
+    header['KC-API-NONCE'] = str(int(time()*1000))
+    signed_str = _sign(endpoint,params_to_str(payload), header['KC-API-NONCE'])
+    # post your request to url
+    header['KC-API-SIGNATURE'] = signed_str
+    # add key and nonce
+    header['KC-API-KEY'] = key
+    data = ''
+    print('arguments are', url+'?'+params_to_str(payload), header)
+    request = requests.post(url+'?'+params_to_str(payload),data=json.dumps({}),headers=header)
+    response_body = request.content
+    print('Latency (ms):',(int(header['KC-API-NONCE'])-int(time()*1000))*-1)
+    print(payload)
+    return response_body
+
+
+request = _post('/v1/order',{
+    'symbol':'RPX-ETH',
+    'amount': '10',
+    'price': '0.000001',
+    'type': 'BUY'
+})
 
 
 
-
-
-
-
+print(request)
 
 
 

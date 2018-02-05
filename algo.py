@@ -1,6 +1,6 @@
 import matplotlib
 matplotlib.use('TkAgg')
-from matplotlib import pyplot
+from matplotlib import pyplot as plt
 import numpy
 import requests
 from time import time
@@ -8,8 +8,10 @@ import base64
 import json
 from time import sleep
 import numpy as np
-import hmac
 import hashlib
+import hmac
+import pandas as pd
+from matplotlib.finance import candlestick_ochl as ochl
 
 
 request = requests.get('https://api.kucoin.com/v1/user/info ')
@@ -54,30 +56,36 @@ class Client():
     def __init__(self, key, secret):
         if key is None:
             key = key
-        #also for secret
+        # also for secret
         self.key = key
 
 
 # Alphabetizes dictionary and converts to string
 def params_to_str(params):
-    # Convert parameters to parseable string
     sign = ''
     keys = list()
     for i in range(0, len(params)):
         keys.append(list(params.keys())[i])
         keys = sorted(keys)
-    for i in range(0, len(params)):
-        sign = sign + keys[i] + '=' + params[list(params.keys())[i]] + '&'
+    for i in range(0,len(params)):
+        sign = sign+keys[i]+'='+params[keys[i]]+'&'
     sign = sign[:-1]
     return sign
 
 
-def _get(endpoint, **parmas):
-    prams_str = ''
-    url = BASE_URL + '?' + params_str
+def _get(endpoint, payload):
+    header = {
+        'Accept-Language': 'en_US',
+        'Content-type': 'application/json'
+    }
+    url = 'http://api.kucoin.com' + endpoint
     # send GET request to that url
-    date = parse('')
-    pass
+    header['KC-API-NONCE'] = str(int(time()*1000))
+    header['KC-API-SIGNATURE'] = _sign(endpoint, params_to_str(payload),header['KC-API-NONCE'])
+    header['KC-API-KEY'] = key
+    request = requests.get(url + "?" + params_to_str(payload), params=payload, headers=header)
+    response_body = request.json()
+    return response_body
 
 
 def parse(data):
@@ -85,9 +93,9 @@ def parse(data):
     pass
 
 
-def _sign(endpoint, str_params_for_sign):
+def _sign(endpoint, str_params_for_sign,nonce):
     # use SHA_256 to encrypto
-    str_to_sign = endpoint + '/' + str((time()*1000)) + '/' + str_params_for_sign
+    str_to_sign = endpoint + '/' + nonce + '/' + str_params_for_sign
     str_to_sign = base64.b64encode(str_to_sign.encode('utf-8'))
     signed_str = hmac.new(secret.encode(), str_to_sign, hashlib.sha256).hexdigest()
     return signed_str
@@ -95,40 +103,37 @@ def _sign(endpoint, str_params_for_sign):
 
 def _post(endpoint, payload):
     # organize header
-    header = {}
-    payload = {
-
+    header = {
+        'Accept-Language':'en_US',
+        'Content-type':'application/json'
     }
-    url = BASE_URL + '/' + endpoint
-    signed_str = _sign(endpoint, str_params_for_sign)
+    url = 'https://api.kucoin.com' + endpoint
+    header['KC-API-NONCE'] = str(int(time()*1000))
+    signed_str = _sign(endpoint,params_to_str(payload), header['KC-API-NONCE'])
     # post your request to url
     header['KC-API-SIGNATURE'] = signed_str
-    header['KC-API-NONCE'] = time()
     # add key and nonce
-
+    header['KC-API-KEY'] = key
     data = ''
-    # parse
-    return
+    print('arguments are', url+'?'+params_to_str(payload), header)
+    request = requests.post(url+'?'+params_to_str(payload),data=json.dumps({}),headers=header)
+    response_body = request.json()
+    print('Latency (ms):',int(header['KC-API-NONCE'])-int(time()*1000))
+    print(payload)
+    return response_body
 
 
 def create_limit_order(symbol, side, price, amount):
     pass
 
 
-print(_sign('/v1/RPX-ETH/order', params_to_str({
-    'amount': '10',
+requests.post('https://api.kucoin.com/v1/order',params={'amount': '10',
     'price': '.00023',
-    'type': 'BUY'
-})))
-
-print(params_to_str({
-    'price': '.00023',
-    'type': 'BUY',
-    'amount': '10'
-}))
-
+    'type': 'BUY'})
 
 # historic data
+
+
 def historic(symbol,first, last):
     payload = {
         'symbol': symbol,
@@ -137,50 +142,30 @@ def historic(symbol,first, last):
     }
     request = requests.get('https://api.kucoin.com/v1/open/chart/history', params=payload)
     jdata = request.json()
-    return jdata['c']
+    return jdata
 
 
-'''
-average = []
-trend = []
-coins = 'ETH'
-price = requests.get('https://api.kucoin.com/v1/open/currencies')
-data = urlopen(price).read()
-data = json.loads(data)
-USD = data['data']['rates']['BTC']['USD']
+data = historic('RPX-ETH', 1000000000,int(time()))
+
+
+def str_to_list(data):
+    for i in range(0,len(data)):
+        if data[i] is not None:
+            data[i] = int(data[i])
+
+
 print(data)
-parameters = {
-    type: BUY,
-    amount: 10,
-    price: 1.1
-}
+df = pd.DataFrame({
+    'open':data['c'],
+    'tstamp':data['t'],
+    'volume':data['v'],
+    'high':str_to_list(data['h']),
+    'close':str_to_list(data['o']),
+    'low':str_to_list(data['l'])
+})
 
-def signature(order, amount, price):
-    type = order
+fig, ax = plt.subplots()
+quotes = df
+oclh(ax, quotes, width=0.6)
+plt.show()
 
-
-    r = Request('https://api.kucoin.com/')
-    r.headers = {
-        "KC-API-KEY": "5a30780191ed297ad231d9f8",
-        "KC-API-NONCE" : time(),
-        "KC-API-SIGNATURE" : signature(parameters)
-}
-
-while True:
-    if len(average) < 10 :
-        average.append(USD)
-    else:
-        del average[0]
-        average.append(USD)
-    data = urlopen(price).read()
-    data = json.loads(data)
-    USD = data['data']['rates']['BTC']['USD']
-    print(average)
-    if len(average) == 10:
-        maverage = (float(average[0]))/int(average[9])-1
-        print(maverage, "% <-- growth in last 10 ticks")
-        trend.append(maverage)
-        print(average[0] - average[9])
-    price = Request('https://api.kucoin.com/v1/open/currencies')
-    sleep(10)
-'''
