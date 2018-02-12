@@ -1,6 +1,9 @@
 import matplotlib
 matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
+import warnings
+import matplotlib.cbook
+warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
 import numpy
 import requests
 from time import time
@@ -26,12 +29,6 @@ def priceRPX():
     data = json.loads(data)
     data = data['data']['lastDealPrice']
     return data
-
-
-def movingaverage(values, window):
-    weights = np.repeat(1.0, window) / window
-    sma = np.convolve(values, weights, 'valid')
-    return sma
 
 
 dataRPX = list()
@@ -145,27 +142,27 @@ def historic(symbol,first, last):
     return jdata
 
 
-data = historic('RPX-ETH', 1000000000,int(time()))
+data = historic('RPX-ETH', 1250000000,int(time()))
 
-
-def str_to_list(data):
-    for i in range(0,len(data)):
-        if data[i] is not None:
-            data[i] = int(data[i])
-
-
-print(data)
 df = pd.DataFrame({
     'open':data['c'],
     'tstamp':data['t'],
     'volume':data['v'],
-    'high':str_to_list(data['h']),
-    'close':str_to_list(data['o']),
-    'low':str_to_list(data['l'])
+    'high':data['h'],
+    'close':data['o'],
+    'low':data['l']
 })
 
-fig, ax = plt.subplots()
-quotes = df
-oclh(ax, quotes, width=0.6)
-plt.show()
 
+def movingaverage(values,window):
+    maverage = []
+    for i in range(0,len(values)):
+        maverage.append(sum(values[i:window+i])/window)
+
+    return maverage
+
+# bollinger bands
+
+test = range(0,200)
+print(movingaverage(test,10))
+print(sum(test[190:200]))
