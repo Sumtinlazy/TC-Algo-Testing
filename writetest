@@ -1,6 +1,3 @@
-import matplotlib
-matplotlib.use('TkAgg')
-from matplotlib import pyplot
 import numpy
 import requests
 import pandas as pd
@@ -12,6 +9,8 @@ from time import sleep
 import numpy as np
 import hashlib
 import hmac
+import math
+import random
 
 secret = 'dc955e1e-12a6-4396-9c1e-bebb21c23b1a'
 key = '5a30780191ed297ad231d9f8'
@@ -98,7 +97,7 @@ def _post(endpoint, payload):
     print(payload)
     return response_body
 
-
+'''
 request = _post('/v1/order',{
     'symbol':'RPX-ETH',
     'amount': '10',
@@ -110,6 +109,26 @@ request = _post('/v1/order',{
 
 print(request)
 
+'''
+test_list = []
+
+for i in range(0, 10):
+    test_list.append(random.randint(0,10))
+
+print(test_list)
 
 
+def standard_dev(values):
+    frame = values
+    frame = list(map(lambda x: x - average(values), frame))
+    frame = list(map(lambda x: x ** 2, frame))
+    var = sum(frame) / (len(values) - 1)
+    var = math.sqrt(var)
+    return var
 
+
+def average(values):
+    total = sum(values)
+    return total / len(values)
+
+print(standard_dev(test_list))

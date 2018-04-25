@@ -1,10 +1,3 @@
-import matplotlib
-matplotlib.use('TkAgg')
-from matplotlib import pyplot as plt
-import warnings
-import matplotlib.cbook
-warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
-import numpy
 import requests
 from time import time
 import base64
@@ -15,6 +8,7 @@ import hashlib
 import hmac
 import pandas as pd
 from matplotlib.finance import candlestick_ochl as ochl
+import math
 
 
 request = requests.get('https://api.kucoin.com/v1/user/info ')
@@ -174,11 +168,48 @@ print(kucoin._get(kucoin, '/v1/order/active', {
 }))
 '''
 
-class info():
-    def movingaverage(values,window):
+
+class data_process():
+    def moving_average(self, values,window):
         sum = 0
         for i in range(0,window):
             sum += values[len(values)-window+i]
         movingaverage = sum/window
         return movingaverage
+
+    def standard_dev(self, values, window):
+        frame = values
+        frame = list(map(lambda x: x - 13, frame))
+        frame = list(map(lambda x: x ** 2, frame))
+        var = sum(frame) / (window - 1)
+        var = math.sqrt(var)
+        return var
+
+    def average(self, values):
+        total = sum(values)
+        return total/len(values)
+
+ # basic trading logic
+
+
+"""
+ #calculating bollinger bands
+   top_band = []
+   mid_band = []
+   bot_band = []
+
+   while True: 
+       mid_band.append(data_process.movingaverage(data, 20))
+       top_band.append(data_process.movinigaverage(data, 20) + 2 * data_process.standard_dev(
+
+
+   if current_bid =< upper_band :
+       sell x amount
+   if current_bid => lower_band :
+       buy x amount
+
+
+"""
+
+
 
