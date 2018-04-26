@@ -9,6 +9,7 @@ import hmac
 import pandas as pd
 from matplotlib.finance import candlestick_ochl as ochl
 import math
+import random
 
 
 request = requests.get('https://api.kucoin.com/v1/user/info ')
@@ -172,44 +173,54 @@ print(kucoin._get(kucoin, '/v1/order/active', {
 class data_process():
     def moving_average(self, values,window):
         sum = 0
+        data = values[-window:]
         for i in range(0,window):
-            sum += values[len(values)-window+i]
+            sum += data[len(data)-window+i]
         movingaverage = sum/window
         return movingaverage
 
+
     def standard_dev(self, values, window):
-        frame = values
-        frame = list(map(lambda x: x - 13, frame))
+        frame = values[-window:]
+        frame = list(map(lambda x: x - dp.average(dp,frame), frame))
         frame = list(map(lambda x: x ** 2, frame))
         var = sum(frame) / (window - 1)
         var = math.sqrt(var)
+
         return var
 
     def average(self, values):
         total = sum(values)
         return total/len(values)
 
+
+dp = data_process
+
  # basic trading logic
 
-
-"""
- #calculating bollinger bands
-   top_band = []
-   mid_band = []
-   bot_band = []
-
-   while True: 
-       mid_band.append(data_process.movingaverage(data, 20))
-       top_band.append(data_process.movinigaverage(data, 20) + 2 * data_process.standard_dev(
+ # bollinger bands
 
 
-   if current_bid =< upper_band :
-       sell x amount
-   if current_bid => lower_band :
-       buy x amount
+mid_band = []
+top_band = []
+bot_band = []
 
 
-"""
+# make a test set of data to use for bollinger band calculations
+data = []
 
+for i in range(0, 100):
+    data.append(random.randint(90, 100))
+
+class logic():
+    def latest_bband(data,window):
+        # calculate and return the latest bollinger band values
+
+        mid_band.append(dp.moving_average(dp, data,window))
+        for i in range(0,len(mid_band)):
+            deviation = dp.standard_dev(dp,data,20)
+            top_band.append(mid_band[i]+(deviation*2))
+            bot_band.append(mid_band[i] - (deviation * 2))
+        return mid_band,top_band,bot_band
 
 

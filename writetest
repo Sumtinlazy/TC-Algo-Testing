@@ -116,6 +116,7 @@ for i in range(0, 10):
     test_list.append(random.randint(0,10))
 
 print(test_list)
+print(test_list[-2:])
 
 
 def standard_dev(values):
@@ -131,4 +132,3 @@ def average(values):
     total = sum(values)
     return total / len(values)
 
-print(standard_dev(test_list))
